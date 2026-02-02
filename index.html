@@ -2,215 +2,84 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
+    <!-- スマホで見た時に文字が小さくならないようにする設定 -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sora - DON'T BE A STUDENT.</title>
+    
+    <!-- 
+      【ライブラリの読み込み】
+      Tailwind CSS: クラス名を書くだけでデザインできる便利な道具箱
+    -->
     <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- 
+      【フォントの読み込み】
+      Google Fontsから「Dela Gothic One（インパクト用）」と「Zen Kaku Gothic New（本文用）」を借りてくる
+    -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=Zen+Kaku+Gothic+New:wght@500;700;900&display=swap" rel="stylesheet">
     
-    <style>
-        :root {
-            --sora-yellow: #FFD700; 
-            --sora-black: #111111;
-            --sora-white: #ffffff;
-        }
-
-        body {
-            font-family: 'Zen Kaku Gothic New', sans-serif;
-            background-color: var(--sora-white);
-            color: var(--sora-black);
-            overflow-x: hidden;
-            cursor: none; /* デフォルトカーソルを消す（カスタムカーソル用） */
-        }
-
-        .font-impact { font-family: 'Dela Gothic One', sans-serif; }
-
-        /* カスタムカーソル */
-        #cursor {
-            position: fixed;
-            top: 0; left: 0;
-            width: 20px; height: 20px;
-            background: var(--sora-black);
-            border-radius: 50%;
-            pointer-events: none;
-            z-index: 9999;
-            transform: translate(-50%, -50%);
-            transition: width 0.3s, height 0.3s, background 0.3s;
-            mix-blend-mode: difference;
-        }
-        #cursor.hovered {
-            width: 60px; height: 60px;
-            background: var(--sora-yellow);
-            opacity: 0.8;
-        }
-
-        /* ローディング画面 */
-        #loader {
-            position: fixed;
-            inset: 0;
-            background: var(--sora-black);
-            z-index: 10000;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            transition: transform 0.8s cubic-bezier(0.76, 0, 0.24, 1);
-        }
-        .loader-text {
-            color: var(--sora-yellow);
-            font-family: 'Dela Gothic One', sans-serif;
-            font-size: 2rem;
-            animation: blink 0.5s infinite;
-        }
-        @keyframes blink { 50% { opacity: 0; } }
-
-        /* スクロールバー */
-        ::-webkit-scrollbar { width: 10px; }
-        ::-webkit-scrollbar-track { background: var(--sora-black); }
-        ::-webkit-scrollbar-thumb { background: var(--sora-yellow); }
-
-        /* 共通：ポップなボックス装飾 */
-        .pop-box {
-            border: 3px solid var(--sora-black);
-            background: white;
-            box-shadow: 8px 8px 0px var(--sora-black);
-            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-            position: relative;
-            overflow: hidden;
-        }
-        .pop-box:hover {
-            transform: translate(-4px, -4px);
-            box-shadow: 12px 12px 0px var(--sora-yellow);
-        }
-        
-        /* インタラクティブなタグ */
-        .hover-tag {
-            transition: transform 0.2s;
-            display: inline-block;
-        }
-        .hover-tag:hover {
-            transform: scale(1.1) rotate(-2deg);
-            background: var(--sora-black) !important;
-            color: var(--sora-yellow) !important;
-        }
-
-        /* 打ち消し線アニメーション */
-        .strike { position: relative; display: inline-block; }
-        .strike::after {
-            content: '';
-            position: absolute;
-            left: -5%; top: 50%;
-            width: 0%; height: 3px;
-            background: var(--sora-black);
-            transform: rotate(-3deg);
-            transition: width 0.5s cubic-bezier(0.22, 1, 0.36, 1);
-        }
-        .strike.active::after { width: 110%; }
-
-        /* スクロール連動アニメーションクラス */
-        .reveal-up {
-            opacity: 0;
-            transform: translateY(50px);
-            transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-        .reveal-up.active { opacity: 1; transform: translateY(0); }
-
-        .reveal-rotate {
-            opacity: 0;
-            transform: rotate(10deg) scale(0.9);
-            transition: all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-        .reveal-rotate.active { opacity: 1; transform: rotate(0) scale(1); }
-
-        /* More Read (アコーディオン) */
-        .voice-content-hidden {
-            max-height: 0;
-            opacity: 0;
-            overflow: hidden;
-            transition: max-height 0.6s ease-out, opacity 0.4s ease-out;
-        }
-        .voice-card.open .voice-content-hidden {
-            max-height: 800px; /* 十分な高さ */
-            opacity: 1;
-            margin-top: 1.5rem;
-            padding-top: 1.5rem;
-            border-top: 2px dashed #ddd;
-        }
-        .voice-card.open {
-            background-color: #fafafa;
-            border-color: var(--sora-black);
-            box-shadow: 12px 12px 0px var(--sora-black); /* 開いた時は影を黒く戻して落ち着かせる */
-            z-index: 10;
-        }
-        /* 矢印回転 */
-        .arrow-icon { transition: transform 0.3s; }
-        .voice-card.open .arrow-icon { transform: rotate(180deg); }
-
-        /* マーキー */
-        .marquee-strip {
-            background: var(--sora-black);
-            color: var(--sora-yellow);
-            padding: 0.8rem 0;
-            overflow: hidden;
-            white-space: nowrap;
-            border-bottom: 3px solid var(--sora-black);
-            position: relative;
-            z-index: 20;
-        }
-        .marquee-content {
-            display: inline-block;
-            animation: scroll 20s linear infinite;
-            font-family: 'Dela Gothic One', sans-serif;
-            font-size: 1.5rem;
-        }
-        @keyframes scroll { 0% { transform: translateX(0); } 100% { transform: translateX(-100%); } }
-
-        /* 背景グリッド */
-        .bg-grid {
-            background-image: radial-gradient(var(--sora-black) 1px, transparent 1px);
-            background-size: 20px 20px;
-            opacity: 0.1;
-            animation: bgMove 20s linear infinite;
-        }
-        @keyframes bgMove { 0% { background-position: 0 0; } 100% { background-position: 40px 40px; } }
-
-    </style>
+    <!-- 
+      【自作CSSの読み込み】
+      cssフォルダの中にある style.css を読み込んで、オリジナルのデザインを適用する
+    -->
+    <link rel="stylesheet" href="css/style.css">
 </head>
+<!-- 
+  bodyクラス解説:
+  selection:〜 -> 文字を選択（反転）した時の色を黄色と黒に指定
+-->
 <body class="selection:bg-yellow-300 selection:text-black">
 
-    <!-- カスタムカーソル -->
+    <!-- 
+      【カスタムカーソル】
+      マウスに追従する黄色い丸。中身は空っぽで、CSSとJSで動かす
+    -->
     <div id="cursor"></div>
 
-    <!-- ローディング画面 -->
+    <!-- 
+      【ローディング画面】
+      ページを開いた瞬間に表示される黒い幕。準備ができたらJSで消す
+    -->
     <div id="loader">
         <div class="text-center">
             <p class="loader-text">Sora </p>
-            <p class="text-white font-bold mt-2 tracking-widest">Welcome to our website
-            </p>
+            <p class="text-white font-bold mt-2 tracking-widest">Welcome to our website</p>
         </div>
     </div>
 
-    <!-- HERO SECTION -->
+    <!-- 
+      【HEROセクション (ファーストビュー)】
+      min-h-screen: 画面の高さいっぱいに広げる
+      overflow-hidden: はみ出した装飾（背景の丸など）を隠す
+    -->
     <header class="min-h-screen flex flex-col relative border-b-4 border-black bg-[var(--sora-yellow)] overflow-hidden">
-        <!-- 背景装飾 -->
+        
+        <!-- 背景のグリッド模様（クリックできないように pointer-events-none を指定） -->
         <div class="absolute inset-0 bg-grid pointer-events-none"></div>
         
-        <!-- フローティング要素（装飾） -->
+        <!-- 浮遊している「?」と「!」の装飾 -->
         <div class="absolute top-20 left-10 text-6xl opacity-20 font-impact animate-bounce pointer-events-none">?</div>
         <div class="absolute bottom-20 right-10 text-8xl opacity-20 font-impact animate-pulse pointer-events-none">!</div>
 
+        <!-- 中央のコンテンツエリア -->
         <div class="container mx-auto px-6 flex-grow flex flex-col justify-center items-center text-center relative z-10 py-20">
             
+            <!-- ラベル: マウスを乗せると回転が戻るアニメーション付き -->
             <div class="bg-black text-white px-6 py-2 mb-8 font-bold tracking-widest text-sm inline-block transform -rotate-2 hover:rotate-0 transition-transform cursor-hover-target">
                 SORA RECRUITMENT
             </div>
 
+            <!-- メインコピー: reveal-upクラスでスクロール時にフワッと出す -->
             <h1 class="font-impact text-6xl md:text-8xl lg:text-9xl leading-none mb-6 tracking-tight text-black drop-shadow-xl reveal-up">
                 DON'T BE<br>A STUDENT.
             </h1>
 
+            <!-- 打ち消し線エリア -->
             <div class="bg-white border-4 border-black px-8 py-6 mt-6 shadow-[8px_8px_0px_black] transform rotate-1 hover:rotate-0 transition-transform reveal-up" style="transition-delay: 0.2s;">
                 <p class="text-xl md:text-3xl font-bold flex flex-wrap justify-center gap-4">
+                    <!-- .strikeクラス: JSで線が引かれるアニメーション -->
                     <span class="strike text-gray-400">学歴</span>
                     <span class="strike text-gray-400">地方</span>
                     <span class="strike text-gray-400">留学先</span>
@@ -229,20 +98,26 @@
 
         </div>
 
-        <!-- 流れる帯 -->
+        <!-- 
+          【マーキー (流れる帯)】
+          CSSのアニメーションで文字を左に流し続けるエリア
+        -->
         <div class="marquee-strip transform rotate-1 scale-105">
             <div class="marquee-content">
                 NO BORDER. JUST CHAOS. DIVERSITY IS POWER. BE PROACTIVE. THINK CRAZY. NO BORDER. JUST CHAOS. DIVERSITY IS POWER. BE PROACTIVE. THINK CRAZY. &nbsp;
             </div>
+            <!-- 途切れないように同じ内容をもう一つ置く -->
             <div class="marquee-content">
                 NO BORDER. JUST CHAOS. DIVERSITY IS POWER. BE PROACTIVE. THINK CRAZY. NO BORDER. JUST CHAOS. DIVERSITY IS POWER. BE PROACTIVE. THINK CRAZY. &nbsp;
             </div>
         </div>
     </header>
 
-    <!-- IDENTITY (MVV) -->
+    <!-- 
+      【IDENTITY (MVV) セクション】 
+    -->
     <section class="py-24 px-6 md:px-12 bg-white relative overflow-hidden">
-        <!-- 背景の巨大文字装飾 -->
+        <!-- 背景に巨大な「ID」という文字を置く（装飾） -->
         <div class="absolute top-0 right-0 text-[15rem] font-impact text-gray-100 leading-none pointer-events-none -z-10 select-none">
             ID
         </div>
@@ -254,7 +129,11 @@
             </div>
             
             <div class="grid md:grid-cols-3 gap-8">
-                <!-- VISION -->
+                <!-- 
+                  VISIONカード 
+                  pop-box: 黒枠と影をつける共通クラス
+                  reveal-rotate: 回転しながら現れるアニメーション
+                -->
                 <div class="pop-box p-8 flex flex-col h-full reveal-rotate cursor-hover-target">
                     <span class="text-xs font-bold bg-black text-white px-2 py-1 inline-block w-max mb-4">VISION</span>
                     <h3 class="font-bold text-2xl mb-4 border-b-2 border-black pb-2 inline-block">あなたの‟やりたい”が<br>見つかる場所となる。</h3>
@@ -265,7 +144,8 @@
                     </p>
                     <div class="absolute -bottom-4 -right-4 text-6xl opacity-10 font-impact">V</div>
                 </div>
-                <!-- MISSION -->
+                
+                <!-- MISSIONカード -->
                 <div class="pop-box p-8 flex flex-col h-full bg-gray-50 reveal-rotate" style="transition-delay: 0.1s;">
                     <span class="text-xs font-bold bg-black text-white px-2 py-1 inline-block w-max mb-4">MISSION</span>
                     <h3 class="font-bold text-2xl mb-4 border-b-2 border-black pb-2 inline-block">一生の思い出を、<br>学生生活に。</h3>
@@ -276,7 +156,8 @@
                     </p>
                     <div class="absolute -bottom-4 -right-4 text-6xl opacity-10 font-impact">M</div>
                 </div>
-                <!-- VALUE -->
+                
+                <!-- VALUEカード -->
                 <div class="pop-box p-8 flex flex-col h-full  reveal-rotate" style="transition-delay: 0.2s;">
                     <span class="text-xs font-bold bg-black text-white px-2 py-1 inline-block w-max mb-4">VALUE</span>
                     <h3 class="font-bold text-2xl mb-4 border-b-2 border-black pb-2 inline-block">メンバーの多様性</h3>
@@ -291,7 +172,10 @@
         </div>
     </section>
 
-    <!-- WHAT YOU CAN DO (環境・差別化) -->
+    <!-- 
+      【WHAT YOU CAN DO セクション】
+      黒背景で雰囲気を変える
+    -->
     <section class="py-24 px-6 md:px-12 bg-[#111] text-white border-y-4 border-black relative">
         <div class="max-w-7xl mx-auto">
             <div class="text-center mb-16 reveal-up">
@@ -326,7 +210,7 @@
                 </div>
 
                 <!-- 2. 圧倒的裁量権 -->
-                <div class="border-4 border-white p-8 relative hover:bg-white/5 transition-colors group cursor-hover-target reveal-up">
+                <div class="border-4 border-white p-8 relative hover:bg-white/5 transition-colors group cursor-hover-target reveal-up" style="transition-delay: 0.2s;">
                     <div class="absolute -top-6 -left-6 bg-[var(--sora-yellow)] text-black font-impact px-4 py-2 text-2xl border-4 border-black transform group-hover:-rotate-12 transition-transform">02</div>
                     <h3 class="font-bold text-2xl mb-4 mt-2 ">
                         裁量権で、<br>企画を推進。
@@ -362,7 +246,10 @@
         </div>
     </section>
 
-    <!-- PROJECT PROOF -->
+    <!-- 
+      【PROJECT PROOF (実績) セクション】
+      ハッカソンの実績を紹介
+    -->
     <section class="py-20 px-6 border-b-4 border-black bg-[var(--sora-yellow)]">
         <div class="max-w-5xl mx-auto flex flex-col md:flex-row items-center gap-8 bg-white border-4 border-black p-8 shadow-[12px_12px_0px_black] transform rotate-1 hover:rotate-0 transition-transform duration-500 reveal-up">
             <div class="w-full md:w-1/3 aspect-video bg-black flex items-center justify-center text-white font-impact text-xl relative group overflow-hidden">
@@ -385,13 +272,17 @@
         </div>
     </section>
 
-    <!-- INTERN VOICES (More Read 機能付き) -->
+    <!-- 
+      【INTERN VOICES (インタビュー) セクション】
+      More Read機能付きで、クリックすると詳細が開く
+    -->
     <section class="py-24 px-6 md:px-12 max-w-7xl mx-auto">
         <h2 class="font-impact text-4xl mb-12 text-center text-black reveal-up">INTERN VOICES</h2>
         
         <div class="grid md:grid-cols-2 gap-6">
             
-            <!-- H.S -->
+            <!-- H.S (秘書) -->
+            <!-- id="voice-hs" をJSで指定して開閉させる -->
             <div class="pop-box p-6 voice-card cursor-hover-target reveal-up" id="voice-hs">
                 <div class="flex justify-between items-start">
                     <span class="bg-[var(--sora-yellow)] text-black border border-black text-xs font-bold px-2 py-1">秘書・文系 / H.S</span>
@@ -403,7 +294,7 @@
                     <p class="text-sm font-bold">作業者から、チーム全体を俯瞰する視点へ。</p>
                 </div>
                 
-                <!-- 隠しコンテンツ -->
+                <!-- 隠しコンテンツ (最初はCSSで見えなくなっている) -->
                 <div class="voice-content-hidden text-sm leading-relaxed text-gray-700">
                     <p class="font-bold mb-2">[Why Sora?]</p>
                     <p class="mb-4">就職活動を意識し始めたときに、「自分の強みを活かせた経験や、ちゃんと話せるエピソードが欲しいな」と思ったのがきっかけです。また、それまで社会人の方と関わる機会がほとんどなかったので、実際に一緒に働きながら、考え方や視点を学びたいと思い参加しました。</p>
@@ -411,14 +302,14 @@
                     <p>「長期インターン気になるけど、不安だな…」と思っている人にこそ、挑戦してほしいです！やってみないと分からないことが本当に多いので、少しでも興味があれば、ぜひチャレンジしてみてください！</p>
                 </div>
 
-                <!-- 開閉ボタン -->
+                <!-- 開閉ボタン (onclickでJSの関数を呼ぶ) -->
                 <button onclick="toggleVoice('voice-hs')" class="w-full mt-6 py-2 border-2 border-black font-bold text-xs hover:bg-black hover:text-white transition-colors flex justify-center items-center gap-2">
                     <span class="btn-text">READ MORE</span>
                     <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="arrow-icon"><path d="m6 9 6 6 6-6"/></svg>
                 </button>
             </div>
 
-            <!-- G.J -->
+            <!-- G.J (エンジニア) -->
             <div class="pop-box p-6 voice-card cursor-hover-target reveal-up" id="voice-gj" style="transition-delay: 0.1s;">
                 <div class="flex justify-between items-start">
                     <span class="bg-black text-white text-xs font-bold px-2 py-1">エンジニア / G.J</span>
@@ -443,7 +334,7 @@
                 </button>
             </div>
 
-            <!-- S.J -->
+            <!-- S.J (営業) -->
             <div class="pop-box p-6 voice-card cursor-hover-target reveal-up" id="voice-sj" style="transition-delay: 0.2s;">
                 <div class="flex justify-between items-start">
                     <span class="bg-black text-white text-xs font-bold px-2 py-1">営業・Media / S.J</span>
@@ -468,7 +359,7 @@
                 </button>
             </div>
 
-            <!-- O.T -->
+            <!-- O.T (企画) -->
             <div class="pop-box p-6 voice-card cursor-hover-target reveal-up" id="voice-ot" style="transition-delay: 0.3s;">
                 <div class="flex justify-between items-start">
                     <span class="bg-black text-white text-xs font-bold px-2 py-1">企画・海外大 / O.T</span>
@@ -496,7 +387,10 @@
         </div>
     </section>
 
-    <!-- CTA -->
+    <!-- 
+      【CTA (行動喚起) セクション】
+      応募ボタンを置く最後のエリア
+    -->
     <section class="py-24 px-6 text-center bg-[#111] relative overflow-hidden">
         <div class="relative z-10 max-w-2xl mx-auto">
             <h2 class="font-impact text-4xl md:text-5xl mb-8 text-white reveal-up">
@@ -504,6 +398,7 @@
             </h2>
             <p class="text-white mb-10 font-bold leading-loose reveal-up" style="transition-delay: 0.1s;">
                 まずは、カジュアルにお話ししましょう。<br>
+                あなたの「企み」を聞かせてください。
             </p>
             
             <a href="https://www.sora.ing/inqueries/new" target="_blank" 
@@ -514,55 +409,10 @@
         </div>
     </section>
 
-    <script>
-        // --- ローディング処理 ---
-        window.addEventListener('load', () => {
-            const loader = document.getElementById('loader');
-            setTimeout(() => {
-                loader.style.transform = 'translateY(-100%)';
-                // 打ち消し線アニメーション発火
-                setTimeout(() => {
-                    document.querySelectorAll('.strike').forEach(el => el.classList.add('active'));
-                }, 500);
-            }, 1500);
-        });
-
-        // --- インタラクション: カスタムカーソル ---
-        const cursor = document.getElementById('cursor');
-        document.addEventListener('mousemove', (e) => {
-            cursor.style.left = e.clientX + 'px';
-            cursor.style.top = e.clientY + 'px';
-        });
-
-        document.querySelectorAll('.cursor-hover-target, a, button').forEach(el => {
-            el.addEventListener('mouseenter', () => cursor.classList.add('hovered'));
-            el.addEventListener('mouseleave', () => cursor.classList.remove('hovered'));
-        });
-
-        // --- インタラクション: スクロール連動表示 ---
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('active');
-                }
-            });
-        }, { threshold: 0.15 });
-
-        document.querySelectorAll('.reveal-up, .reveal-rotate').forEach(el => observer.observe(el));
-
-        // --- More Read (アコーディオン) 機能 ---
-        function toggleVoice(id) {
-            const card = document.getElementById(id);
-            const btnText = card.querySelector('.btn-text');
-            
-            card.classList.toggle('open');
-            
-            if (card.classList.contains('open')) {
-                btnText.textContent = 'CLOSE';
-            } else {
-                btnText.textContent = 'READ MORE';
-            }
-        }
-    </script>
+    <!-- 
+      【JavaScriptの読み込み】
+      bodyの最後に書くことで、画面表示をブロックせずにスクリプトを読み込む
+    -->
+    <script src="js/script.js"></script>
 </body>
 </html>
