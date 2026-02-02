@@ -1,0 +1,133 @@
+/* デザインで使う共通の色の設定（変数） */
+:root {
+    --sora-yellow: #FFD700; 
+    --sora-black: #111111;
+    --sora-white: #ffffff;
+}
+
+body {
+    font-family: 'Zen Kaku Gothic New', sans-serif;
+    background-color: var(--sora-white);
+    color: var(--sora-black);
+    overflow-x: hidden; /* 横スクロールが出ないようにする */
+    cursor: none; /* 標準のマウスカーソルを隠す（自作カーソルを使うため） */
+}
+
+/* インパクトのあるフォント用 */
+.font-impact { font-family: 'Dela Gothic One', sans-serif; }
+
+/* --- 自作マウスカーソルの見た目 --- */
+#cursor {
+    position: fixed; /* 画面に対して固定 */
+    top: 0; left: 0;
+    width: 20px; height: 20px;
+    background: var(--sora-black);
+    border-radius: 50%; /* 丸くする */
+    pointer-events: none; /* カーソル自体がクリックを邪魔しないようにする */
+    z-index: 9999; /* 一番手前に表示 */
+    transform: translate(-50%, -50%); /* 中心がマウスに合うように調整 */
+    transition: width 0.3s, height 0.3s, background 0.3s; /* 変化を滑らかに */
+    mix-blend-mode: difference; /* 背景の色に合わせて反転するお洒落な効果 */
+}
+/* ホバーした時のカーソルの姿 */
+#cursor.hovered {
+    width: 60px; height: 60px;
+    background: var(--sora-yellow);
+    opacity: 0.8;
+}
+
+/* --- ローディング画面 --- */
+#loader {
+    position: fixed;
+    inset: 0; /* 画面いっぱいに広げる */
+    background: var(--sora-black);
+    z-index: 10000;
+    display: flex;
+    justify-content: center; /* 文字を真ん中に */
+    align-items: center;
+    transition: transform 0.8s cubic-bezier(0.76, 0, 0.24, 1); /* 気持ちいい加速で消える設定 */
+}
+.loader-text {
+    color: var(--sora-yellow);
+    font-size: 2rem;
+    animation: blink 0.5s infinite; /* 点滅させる */
+}
+@keyframes blink { 50% { opacity: 0; } }
+
+/* --- 共通：ポップなボックス装飾 --- */
+.pop-box {
+    border: 3px solid var(--sora-black);
+    background: white;
+    box-shadow: 8px 8px 0px var(--sora-black); /* 太い影をつけて立体感を出す */
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    position: relative;
+    overflow: hidden;
+}
+.pop-box:hover {
+    transform: translate(-4px, -4px); /* 少し左上に浮き上がる */
+    box-shadow: 12px 12px 0px var(--sora-yellow); /* 影を黄色く大きくする */
+}
+
+/* --- 打ち消し線アニメーション --- */
+.strike { position: relative; display: inline-block; }
+.strike::after {
+    content: '';
+    position: absolute;
+    left: -5%; top: 50%;
+    width: 0%; height: 3px; /* 最初は長さ0 */
+    background: var(--sora-black);
+    transform: rotate(-3deg);
+    transition: width 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.strike.active::after { width: 110%; } /* activeになると線が伸びる */
+
+/* --- スクロール連動アニメーション --- */
+.reveal-up {
+    opacity: 0;
+    transform: translateY(50px); /* 下に下げて隠しておく */
+    transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.reveal-up.active { opacity: 1; transform: translateY(0); } /* 上にスライドして現れる */
+
+/* --- More Read (アコーディオン) --- */
+.voice-content-hidden {
+    max-height: 0; /* 高さを0にして隠す */
+    opacity: 0;
+    overflow: hidden;
+    transition: max-height 0.6s ease-out, opacity 0.4s ease-out;
+}
+.voice-card.open .voice-content-hidden {
+    max-height: 800px; /* 開いた時に高さを出して中身を見せる */
+    opacity: 1;
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 2px dashed #ddd;
+}
+
+/* --- マーキー（横に流れる文字） --- */
+.marquee-strip {
+    background: var(--sora-black);
+    color: var(--sora-yellow);
+    overflow: hidden;
+    white-space: nowrap; /* 改行させない */
+}
+.marquee-content {
+    display: inline-block;
+    animation: scroll 20s linear infinite; /* 20秒かけてループ再生 */
+}
+@keyframes scroll { 
+    0% { transform: translateX(0); } 
+    100% { transform: translateX(-100%); } /* 左端まで流す */
+}
+
+/* --- 背景グリッド（ドット模様） --- */
+.bg-grid {
+    background-image: radial-gradient(var(--sora-black) 1px, transparent 1px);
+    background-size: 20px 20px;
+    opacity: 0.1;
+    animation: bgMove 20s linear infinite; /* 背景もゆっくり動かす */
+}
+@keyframes bgMove { 
+    0% { background-position: 0 0; } 
+    100% { background-position: 40px 40px; } 
+}
